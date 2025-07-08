@@ -5,14 +5,16 @@
 Paddle::Paddle() 
     : Entity(), 
       maxSpeed(500.0f),
-      moveDirection(0.0f) {
+      moveDirection(0.0f),
+      windowWidth(800.0f) {  // 默认窗口宽度
     speed = 500.0f;
 }
 
 Paddle::Paddle(const sf::Vector2f& pos, const sf::Vector2f& size)
     : Entity(pos, size), 
       maxSpeed(500.0f),
-      moveDirection(0.0f) {
+      moveDirection(0.0f),
+      windowWidth(800.0f) {  // 默认窗口宽度
     speed = 500.0f;
 }
 
@@ -21,6 +23,17 @@ void Paddle::update(float deltaTime) {
     
     // 根据移动方向更新位置
     position.x += moveDirection * speed * deltaTime;
+    
+    // 添加屏幕边界检查，防止挡板移出屏幕
+    // 限制左边界
+    if (position.x < 0) {
+        position.x = 0;
+    }
+    
+    // 限制右边界（确保挡板完全在屏幕内）
+    if (position.x + size.x > windowWidth) {
+        position.x = windowWidth - size.x;
+    }
     
     // 使用父类的setPosition方法，会正确处理sprite指针
     setPosition(position);
@@ -72,4 +85,9 @@ void Paddle::setMaxSpeed(float speed) {
 
 float Paddle::getMaxSpeed() const {
     return maxSpeed;
+}
+
+// 实现设置窗口宽度的方法
+void Paddle::setWindowWidth(float width) {
+    windowWidth = width;
 }

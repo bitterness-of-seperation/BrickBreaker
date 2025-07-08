@@ -50,6 +50,12 @@ private:
     
     // 加载关卡
     void loadLevel(int levelNumber);
+    
+    // 加载下一关
+    void loadNextLevel();
+    
+    // 重新开始游戏
+    void restartGame();
 
 public:
     PlayState(Game* game);
@@ -74,8 +80,6 @@ public:
     bool isGameOver() const;
     bool isLevelCompleted() const;
 
-    // 添加以下三个方法声明
+    // 添加分数
     void addScore(int points);
-    void onBrickHit(Brick* brick);
-    void onBallPaddleCollision();
 };

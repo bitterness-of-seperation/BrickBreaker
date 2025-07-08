@@ -9,18 +9,30 @@
 PlayState::PlayState(Game* game)
     : GameState(game),
       score(0),
-      lives(3),
+      lives(Config::getInstance().getValue("game.initial_lives", 3)),
       ballLaunched(false),
       gameOver(false),
       levelCompleted(false) {
 }
 
-void PlayState::init() {
+void PlayState::init() { //设置碰撞管理、关卡管理和初始化游戏
     // Get window size
     sf::Vector2u windowSize = game->getWindow().getSize();
     
     // Set collision manager
     collisionManager.setWindowSize(windowSize);
+    
+    // Set collision callbacks
+    collisionManager.setOnBrickHitCallback([this](Brick* brick) {
+        if (brick) {
+            this->addScore(brick->getScore());
+            AssetManager::getInstance()->playSound("break");
+        }
+    });
+    
+    collisionManager.setOnBallPaddleCollisionCallback([this]() {
+        AssetManager::getInstance()->playSound("hit");
+    });
     
     // Initialize level manager
     std::vector<std::string> levelFiles = {
@@ -29,9 +41,16 @@ void PlayState::init() {
         "resources/levels/level3.txt"
     };
     
+    // 确保关卡区域不会超出屏幕宽度
+    float levelWidth = windowSize.x - 100.0f; // 左右各留50像素边距
+    
     levelManager.init(levelFiles, 
                       sf::Vector2f(50.0f, 50.0f), 
-                      sf::Vector2f(windowSize.x - 100.0f, 200.0f));
+                      sf::Vector2f(levelWidth, 200.0f));
+    
+    // 设置砖块尺寸和间距
+    levelManager.setBrickSize(sf::Vector2f(70.0f, 30.0f));
+    levelManager.setBrickPadding(sf::Vector2f(2.0f, 2.0f));
     
     // 加载字体
     try {
@@ -43,7 +62,7 @@ void PlayState::init() {
             scoreText->setFillColor(sf::Color::White);
             scoreText->setPosition(sf::Vector2f(10.0f, 10.0f));
             
-            livesText = std::make_unique<sf::Text>(font, "Lives: 3", 24);
+            livesText = std::make_unique<sf::Text>(font, "Lives: " + std::to_string(lives), 24);
             livesText->setFillColor(sf::Color::White);
             livesText->setPosition(sf::Vector2f(10.0f, 40.0f));
             
@@ -69,7 +88,7 @@ void PlayState::init() {
     initGame();
 }
 
-void PlayState::initGame() {
+void PlayState::initGame() { //创建实体和更新ui
     // Get window size
     sf::Vector2u windowSize = game->getWindow().getSize();
     
@@ -78,6 +97,12 @@ void PlayState::initGame() {
         sf::Vector2f((windowSize.x - 100.0f) / 2.0f, windowSize.y - 50.0f),
         sf::Vector2f(100.0f, 20.0f)
     );
+    
+    // Set paddle window width for boundary checking
+    paddle->setWindowWidth(static_cast<float>(windowSize.x));
+    
+    // Set paddle speed from config
+    paddle->setMaxSpeed(Config::getInstance().getValue("game.paddle_speed", 500.0f));
     
     // Set paddle texture
     if (AssetManager::getInstance()->hasTexture("paddle")) {
@@ -103,26 +128,33 @@ void PlayState::initGame() {
     gameOver = false;
     levelCompleted = false;
     score = 0;
-    lives = 3;
+    lives = Config::getInstance().getValue("game.initial_lives", 3);
     
     // Update UI
     updateUI();
 }
 
-void PlayState::handleInput(const sf::Event& event) {
+void PlayState::handleInput(const sf::Event& event) { //输入事件
     if (event.is<sf::Event::KeyPressed>()) {
         const auto* keyEvent = event.getIf<sf::Event::KeyPressed>();
         if (keyEvent) {
             switch (keyEvent->code) {
                 case sf::Keyboard::Key::Space:
-                    if (!ballLaunched && !gameOver) {
-                    launchBall();
-                }
-                break;
+                    if (!ballLaunched && !gameOver && !levelCompleted) {
+                        launchBall();
+                    } else if (levelCompleted && levelManager.hasNextLevel()) {
+                        // Load next level
+                        loadNextLevel();
+                    } 
+                    break;
                 
                 case sf::Keyboard::Key::Escape:
-                game->pushState(std::make_unique<PauseState>(game));
-                break;
+                    game->pushState(std::make_unique<PauseState>(game));
+                    break;
+                
+                case sf::Keyboard::Key::P:
+                    game->pushState(std::make_unique<PauseState>(game));
+                    break;
                 
             default:
                 break;
@@ -131,8 +163,9 @@ void PlayState::handleInput(const sf::Event& event) {
     }
     
     // Handle continuous key input
-    if (!gameOver) {
-        float paddleSpeed = 400.0f; // pixels/second
+    if (!gameOver && !levelCompleted) {
+        // Get configured paddle speed and key bindings
+        float paddleSpeed = paddle->getMaxSpeed();
         
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
             movePaddle(-paddleSpeed * game->getDeltaTime());
@@ -143,7 +176,7 @@ void PlayState::handleInput(const sf::Event& event) {
     }
 }
 
-void PlayState::update(float deltaTime) {
+void PlayState::update(float deltaTime) { //更新实体和ui
     if (gameOver || levelCompleted) {
         return;
     }
@@ -189,9 +222,10 @@ void PlayState::update(float deltaTime) {
     checkGameStatus();
 }
 
-void PlayState::render(sf::RenderWindow& window) {
-    // Draw background
-    window.clear(sf::Color(20, 20, 50));//深蓝色背景，增加与砖块的对比度
+void PlayState::render(sf::RenderWindow& window) { //渲染实体和ui
+    // Draw background with color from config
+    sf::Color bgColor = Config::getInstance().getValue("colors.background", sf::Color(20, 20, 50));
+    window.clear(bgColor);
     
     // Draw entities
     paddle->render(window);
@@ -212,7 +246,15 @@ void PlayState::render(sf::RenderWindow& window) {
 void PlayState::launchBall() {
     if (!ballLaunched) {
         ballLaunched = true;
-        ball->setVelocity(sf::Vector2f(200.0f, -300.0f));
+        
+        // Get ball speed from config
+        float ballSpeed = Config::getInstance().getValue("game.ball_speed", 300.0f);
+        
+        // Calculate initial velocity components
+        float vx = ballSpeed * 0.5f; // Horizontal component (adjust as needed)
+        float vy = -ballSpeed;       // Vertical component (negative to go up)
+        
+        ball->setVelocity(sf::Vector2f(vx, vy));
         if (messageText) messageText->setString("");
     }
 }
@@ -259,7 +301,7 @@ void PlayState::checkGameStatus() {
         if (levelManager.hasNextLevel()) {
             if (messageText) messageText->setString("Level Complete! Press Space to Continue");
         } else {
-            if (messageText) messageText->setString("Congratulations! Press ESC for Menu");
+            game->pushState(std::make_unique<GameOverState>(game, score));
         }
     }
 }
@@ -293,18 +335,63 @@ void PlayState::addScore(int points) {
     updateUI();
 }
 
-void PlayState::onBrickHit(Brick* brick) {
-    if (brick) {
-        addScore(brick->getScore());
-        AssetManager::getInstance()->playSound("break");
-    }
-}
-
-void PlayState::onBallPaddleCollision() {
-    AssetManager::getInstance()->playSound("hit");
-    }
-
 void PlayState::updateUI() {
     if (scoreText) scoreText->setString("Score: " + std::to_string(score));
     if (livesText) livesText->setString("Lives: " + std::to_string(lives));
+}
+
+void PlayState::loadNextLevel() {
+    // Load the next level
+    int currentLevel = levelManager.getCurrentLevel();
+    bricks = levelManager.loadLevel(currentLevel + 1);
+    
+    // Reset game state for new level
+    levelCompleted = false;
+    ballLaunched = false;
+    
+    // Maintain the current score but reset lives to initial value
+    lives = Config::getInstance().getValue("game.initial_lives", 3);
+    
+    // Reset ball and paddle positions
+    resetBallAndPaddle();
+    
+    // Update message and UI
+    if (messageText) messageText->setString("Press Space to Launch Ball");
+    updateUI();
+}
+
+void PlayState::restartGame() {
+    // Reset score
+    score = 0;
+    
+    // Reset lives to initial value from config
+    lives = Config::getInstance().getValue("game.initial_lives", 3);
+    
+    // Reset game state
+    gameOver = false;
+    levelCompleted = false;
+    ballLaunched = false;
+    
+    // Load first level
+    loadLevel(0);
+    
+    // Reset ball and paddle positions
+    resetBallAndPaddle();
+    
+    // Update UI
+    updateUI();
+    
+    // Update message
+    if (messageText) {
+        messageText->setString("Press Space to Launch Ball");
+        
+        // Reset message position (in case it was moved for congratulations message)
+        sf::Vector2u windowSize = game->getWindow().getSize();
+        sf::FloatRect messageBounds = messageText->getLocalBounds();
+        messageText->setOrigin({messageBounds.size.x / 2.0f, messageBounds.size.y / 2.0f});
+        messageText->setPosition(sf::Vector2f(
+            windowSize.x / 2.0f,
+            windowSize.y * 0.7f
+        ));
+    }
 }

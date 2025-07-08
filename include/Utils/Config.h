@@ -33,6 +33,9 @@ private:
     // 解析配置行
     void parseLine(const std::string& line);
     
+    // 将配置值写入文件的辅助函数
+    void writeConfigValue(std::ofstream& file, const std::string& key, const std::any& value) const;
+    
     // 将值字符串转换为具体类型
     template<typename T>
     T convertValue(const std::string& valueStr);
@@ -87,7 +90,7 @@ T Config::getValue(const std::string& key, const T& defaultValue) const {
         try {
             return std::any_cast<T>(it->second);
         } catch (const std::bad_any_cast&) {
-            std::cerr << "Config: 类型转换错误，键: " << key << std::endl;
+            std::cerr << "Config: Type conversion error, key: " << key << std::endl;
             return defaultValue;
         }
     }

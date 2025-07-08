@@ -11,7 +11,7 @@ MenuState::MenuState(Game* game)
     menuPosition(0.0f, 0.0f){
 }
 
-void MenuState::init() {
+void MenuState::init() { //设置背景、字体、菜单项
     // 获取窗口大小
     sf::Vector2u windowSize = game->getWindow().getSize();
     
@@ -52,7 +52,7 @@ void MenuState::init() {
     
     // 初始化选择器
     selector.setRadius(10.0f);
-    selector.setFillColor(sf::Color::Red);
+    selector.setFillColor(sf::Color::Yellow);
     selector.setOrigin(sf::Vector2f(10.0f, 10.0f));
     
     // 初始化菜单项
@@ -62,13 +62,15 @@ void MenuState::init() {
     updateSelectorPosition();
 }
 
-void MenuState::initMenuItems() {
+void MenuState::initMenuItems() { //设置菜单项
     // 清空现有菜单项
     menuItems.clear();
     
     // Add default menu items
     addMenuItem("Start Game", [this]() {
-        game->changeState(std::make_unique<PlayState>(game));
+        // Create a new PlayState to start a fresh game from level 1
+        auto playState = std::make_unique<PlayState>(game);
+        game->changeState(std::move(playState));
     });
     
     addMenuItem("Settings", [this]() {
@@ -87,7 +89,7 @@ void MenuState::initMenuItems() {
     }
 }
 
-void MenuState::handleInput(const sf::Event& event) {
+void MenuState::handleInput(const sf::Event& event) { //输入事件
     if (event.is<sf::Event::KeyPressed>()) {
         const auto* keyEvent = event.getIf<sf::Event::KeyPressed>();
         if (keyEvent) {
@@ -112,11 +114,11 @@ void MenuState::handleInput(const sf::Event& event) {
     }
 }
 
-void MenuState::update(float deltaTime) {
+void MenuState::update(float deltaTime) { //菜单不用频繁更新
     // 菜单状态通常不需要每帧更新逻辑
 }
 
-void MenuState::render(sf::RenderWindow& window) {
+void MenuState::render(sf::RenderWindow& window) { //渲染背景、标题、选择器和菜单项
     // Draw background
     window.draw(background);
     

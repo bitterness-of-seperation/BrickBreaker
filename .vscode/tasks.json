@@ -1,0 +1,45 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "yunxing",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-std=c++17",
+                "-g",
+                "${workspaceFolder}/src/main.cpp",
+                "${workspaceFolder}/src/Game.cpp",
+                "${workspaceFolder}/src/Entities/Ball.cpp",
+                "${workspaceFolder}/src/Entities/Brick.cpp",
+                "${workspaceFolder}/src/Entities/Entity.cpp",
+                "${workspaceFolder}/src/Entities/Paddle.cpp",
+                "${workspaceFolder}/src/Managers/AssetManager.cpp",
+                "${workspaceFolder}/src/Managers/CollisionManager.cpp",
+                "${workspaceFolder}/src/Managers/LevelManager.cpp",
+                "${workspaceFolder}/src/States/GameOverState.cpp",
+                "${workspaceFolder}/src/States/MenuState.cpp",
+                "${workspaceFolder}/src/States/PauseState.cpp",
+                "${workspaceFolder}/src/States/PlayState.cpp",
+                "${workspaceFolder}/src/Utils/Config.cpp",
+                "${workspaceFolder}/src/Utils/Utils.cpp",
+                "-o",
+                "${workspaceFolder}/BrickBreaker.exe",
+                "-I",
+                "${workspaceFolder}/include",
+                "-I",
+                "C:/Program Files/SFML-3.0.0/include",
+                "-L",
+                "C:/Program Files/SFML-3.0.0/lib",
+                "-lsfml-graphics",
+                "-lsfml-window",
+                "-lsfml-system",
+                "-lsfml-audio"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

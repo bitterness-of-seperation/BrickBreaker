@@ -1,15 +1,18 @@
 #include "Entities/Ball.h"
+#include "Utils/Config.h"
 #include <cmath>
 
-Ball::Ball() : Entity(), velocity(200.0f, -200.0f), radius(10.0f) {
-    speed = 400.0f;
+Ball::Ball() : Entity(), velocity(0.0f, 0.0f), radius(10.0f) {
+    // Get ball speed from config
+    speed = Config::getInstance().getValue("game.ball_speed", 300.0f);
 }
 
 Ball::Ball(const sf::Vector2f& pos, float radius) 
     : Entity(pos, sf::Vector2f(radius * 2, radius * 2)), 
-      velocity(200.0f, -200.0f), 
+      velocity(0.0f, 0.0f), 
       radius(radius) {
-    speed = 400.0f;
+    // Get ball speed from config
+    speed = Config::getInstance().getValue("game.ball_speed", 300.0f);
 }
 
 void Ball::update(float deltaTime) {

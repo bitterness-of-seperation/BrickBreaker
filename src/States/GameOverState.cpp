@@ -13,7 +13,7 @@ GameOverState::GameOverState(Game* game, int score)
       finalScore(score) {
 }
 
-void GameOverState::init() {
+void GameOverState::init() { //设置背景、字体、菜单项
     // 获取窗口大小
     sf::Vector2u windowSize = game->getWindow().getSize();
     
@@ -73,13 +73,15 @@ void GameOverState::init() {
     updateSelectorPosition();
 }
 
-void GameOverState::initMenuItems() {
+void GameOverState::initMenuItems() { //设置菜单项
     // 清空现有菜单项
     menuItems.clear();
     
     // Add default menu items
     addMenuItem("Play Again", [this]() {
-        game->changeState(std::make_unique<PlayState>(game));
+        // Create a new PlayState to restart the game from level 1
+        auto playState = std::make_unique<PlayState>(game);
+        game->changeState(std::move(playState));
     });
     
     addMenuItem("Main Menu", [this]() {
@@ -97,7 +99,7 @@ void GameOverState::initMenuItems() {
     }
 }
 
-void GameOverState::handleInput(const sf::Event& event) {
+void GameOverState::handleInput(const sf::Event& event) { //输入事件
     if (event.is<sf::Event::KeyPressed>()) {
         const auto* keyEvent = event.getIf<sf::Event::KeyPressed>();
         if (keyEvent) {
@@ -126,11 +128,11 @@ void GameOverState::handleInput(const sf::Event& event) {
     }
 }
 
-void GameOverState::update(float deltaTime) {
+void GameOverState::update(float deltaTime) { //游戏结束不需要频繁更新
     // GameOverState通常不需要每帧更新逻辑
 }
 
-void GameOverState::render(sf::RenderWindow& window) {
+void GameOverState::render(sf::RenderWindow& window) { //渲染背景、标题、分数、选择器和菜单项
     // 绘制背景
     window.draw(background);
     

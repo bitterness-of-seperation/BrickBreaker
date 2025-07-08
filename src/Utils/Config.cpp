@@ -19,7 +19,7 @@ Config& Config::getInstance() {
 
 void Config::initDefaults() {
     // 窗口设置
-    setValue("window.title", std::string("打砖块游戏"));
+    setValue("window.title", std::string("BrickBreaker"));
     setValue("window.width", 800);
     setValue("window.height", 600);
     setValue("window.fullscreen", false);
@@ -28,8 +28,8 @@ void Config::initDefaults() {
     
     // 游戏设置
     setValue("game.ball_speed", 300.0f);
-    setValue("game.paddle_speed", 500.0f);
-    setValue("game.initial_lives", 3);
+    setValue("game.paddle_speed", 50.0f);
+    setValue("game.initial_lives", 10);
     setValue("game.brick_rows", 5);
     setValue("game.brick_columns", 10);
     
@@ -68,7 +68,7 @@ bool Config::save(const std::string& filename) const {
 bool Config::loadFromFile(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cerr << "无法打开配置文件: " << filename << std::endl;
+        std::cerr << "cannot open config file: " << filename << std::endl;
         return false;
     }
     
@@ -83,57 +83,124 @@ bool Config::loadFromFile(const std::string& filename) {
     }
     
     file.close();
+    std::cout << "load config file successfully: " << filename << std::endl;
     return true;
 }
 
 bool Config::saveToFile(const std::string& filename) const {
     std::ofstream file(filename);
     if (!file.is_open()) {
-        std::cerr << "无法创建配置文件: " << filename << std::endl;
+        std::cerr << "cannot create config file: " << filename << std::endl;
         return false;
     }
     
-    file << "# 打砖块游戏配置文件\n";
-    file << "# 自动生成，请勿手动修改\n\n";
+    file << "# config file for BrickBreaker\n";
+    file << "# automatically generated, do not modify manually\n\n";
     
+    // 按类别组织配置项
+    // 窗口设置
+    file << "# window settings\n";
     for (const auto& pair : values) {
-        file << pair.first << " = ";
-        
-        // 处理不同类型的值
-        try {
-            if (pair.second.type() == typeid(std::string)) {
-                file << std::any_cast<std::string>(pair.second);
-            } else if (pair.second.type() == typeid(int)) {
-                file << std::any_cast<int>(pair.second);
-            } else if (pair.second.type() == typeid(float)) {
-                file << std::any_cast<float>(pair.second);
-            } else if (pair.second.type() == typeid(double)) {
-                file << std::any_cast<double>(pair.second);
-            } else if (pair.second.type() == typeid(bool)) {
-                file << (std::any_cast<bool>(pair.second) ? "true" : "false");
-            } else if (pair.second.type() == typeid(sf::Vector2f)) {
-                const auto& vec = std::any_cast<sf::Vector2f>(pair.second);
-                file << vec.x << "," << vec.y;
-            } else if (pair.second.type() == typeid(sf::Color)) {
-                const auto& color = std::any_cast<sf::Color>(pair.second);
-                file << static_cast<int>(color.r) << "," 
-                     << static_cast<int>(color.g) << "," 
-                     << static_cast<int>(color.b) << "," 
-                     << static_cast<int>(color.a);
-            } else if (pair.second.type() == typeid(sf::Keyboard::Key)) {
-                file << static_cast<int>(std::any_cast<sf::Keyboard::Key>(pair.second));
-            } else {
-                file << "未知类型";
-            }
-        } catch (const std::bad_any_cast&) {
-            file << "Type error";
+        if (pair.first.find("window.") == 0) {
+            writeConfigValue(file, pair.first, pair.second);
         }
-        
-        file << "\n";
+    }
+    file << "\n";
+    
+    // 游戏设置
+    file << "# game settings\n";
+    for (const auto& pair : values) {
+        if (pair.first.find("game.") == 0) {
+            writeConfigValue(file, pair.first, pair.second);
+        }
+    }
+    file << "\n";
+    
+    // 颜色设置
+    file << "# color settings\n";
+    for (const auto& pair : values) {
+        if (pair.first.find("colors.") == 0) {
+            writeConfigValue(file, pair.first, pair.second);
+        }
+    }
+    file << "\n";
+    
+    // 音效设置
+    file << "# sound settings\n";
+    for (const auto& pair : values) {
+        if (pair.first.find("sound.") == 0) {
+            writeConfigValue(file, pair.first, pair.second);
+        }
+    }
+    file << "\n";
+    
+    // 控制设置
+    file << "# control settings\n";
+    for (const auto& pair : values) {
+        if (pair.first.find("controls.") == 0) {
+            writeConfigValue(file, pair.first, pair.second);
+        }
+    }
+    file << "\n";
+    
+    // 其他设置
+    bool hasOthers = false;
+    for (const auto& pair : values) {
+        if (pair.first.find("window.") != 0 && 
+            pair.first.find("game.") != 0 && 
+            pair.first.find("colors.") != 0 && 
+            pair.first.find("sound.") != 0 && 
+            pair.first.find("controls.") != 0) {
+            
+            if (!hasOthers) {
+                file << "# other settings\n";
+                hasOthers = true;
+            }
+            
+            writeConfigValue(file, pair.first, pair.second);
+        }
     }
     
     file.close();
+    std::cout << "save config file successfully: " << filename << std::endl;
     return true;
+}
+
+// 辅助函数，用于将配置值写入文件
+void Config::writeConfigValue(std::ofstream& file, const std::string& key, const std::any& value) const {
+    file << key << " = ";
+    
+    // 处理不同类型的值
+    try {
+        if (value.type() == typeid(std::string)) {
+            file << std::any_cast<std::string>(value);
+        } else if (value.type() == typeid(int)) {
+            file << std::any_cast<int>(value);
+        } else if (value.type() == typeid(float)) {
+            file << std::any_cast<float>(value);
+        } else if (value.type() == typeid(double)) {
+            file << std::any_cast<double>(value);
+        } else if (value.type() == typeid(bool)) {
+            file << (std::any_cast<bool>(value) ? "true" : "false");
+        } else if (value.type() == typeid(sf::Vector2f)) {
+            const auto& vec = std::any_cast<sf::Vector2f>(value);
+            file << vec.x << "," << vec.y;
+        } else if (value.type() == typeid(sf::Color)) {
+            const auto& color = std::any_cast<sf::Color>(value);
+            file << static_cast<int>(color.r) << "," 
+                 << static_cast<int>(color.g) << "," 
+                 << static_cast<int>(color.b) << "," 
+                 << static_cast<int>(color.a);
+        } else if (value.type() == typeid(sf::Keyboard::Key)) {
+            file << static_cast<int>(std::any_cast<sf::Keyboard::Key>(value));
+        } else {
+            file << "unknown type";
+        }
+    } catch (const std::bad_any_cast&) {
+        file << "type error";
+    }
+    
+    file << "\n";
 }
 
 void Config::parseLine(const std::string& line) {
@@ -172,16 +239,47 @@ void Config::parseLine(const std::string& line) {
     } else if (valueStr.find('.') != std::string::npos) {
         // 浮点数
         try {
-            setValue(key, std::stof(valueStr));
+            float floatValue = std::stof(valueStr);
+            
+            // Check if the key suggests it should be a float
+            if (key.find("speed") != std::string::npos || 
+                key.find("volume") != std::string::npos ||
+                key.find("scale") != std::string::npos) {
+                setValue(key, floatValue);
+            } else {
+                // Try to determine if it's an int or float
+                int intValue = static_cast<int>(floatValue);
+                if (floatValue == static_cast<float>(intValue)) {
+                    setValue(key, intValue);
+                } else {
+                    setValue(key, floatValue);
+                }
+            }
         } catch (const std::exception&) {
-            std::cerr << "配置解析错误：无法将 " << valueStr << " 转换为浮点数" << std::endl;
+            std::cerr << "config parse error: cannot convert " << valueStr << " to float" << std::endl;
         }
     } else {
-        // 整数
+        // 整数或可能是浮点数
         try {
-            setValue(key, std::stoi(valueStr));
+            // First try as integer
+            int intValue = std::stoi(valueStr);
+            
+            // Check if the key suggests it should be a float
+            if (key.find("speed") != std::string::npos || 
+                key.find("volume") != std::string::npos ||
+                key.find("scale") != std::string::npos) {
+                setValue(key, static_cast<float>(intValue));
+            } else {
+                setValue(key, intValue);
+            }
         } catch (const std::exception&) {
-            std::cerr << "配置解析错误：无法将 " << valueStr << " 转换为整数" << std::endl;
+            // If integer conversion fails, try as float
+            try {
+                float floatValue = std::stof(valueStr);
+                setValue(key, floatValue);
+            } catch (const std::exception&) {
+                std::cerr << "config parse error: cannot convert " << valueStr << " to int or float" << std::endl;
+            }
         }
     }
 }
@@ -196,7 +294,7 @@ sf::Vector2f Config::convertVector2f(const std::string& valueStr) {
             float y = std::stof(yStr);
             return sf::Vector2f(x, y);
         } catch (const std::exception&) {
-            std::cerr << "配置解析错误：无法将 " << valueStr << " 转换为Vector2f" << std::endl;
+            std::cerr << "config parse error: cannot convert " << valueStr << " to Vector2f" << std::endl;
         }
     }
     
@@ -223,7 +321,7 @@ sf::Color Config::convertColor(const std::string& valueStr) {
                 static_cast<std::uint8_t>(a)
             );
         } catch (const std::exception&) {
-            std::cerr << "配置解析错误：无法将 " << valueStr << " 转换为Color" << std::endl;
+            std::cerr << "config parse error: cannot convert " << valueStr << " to Color" << std::endl;
         }
     }
     

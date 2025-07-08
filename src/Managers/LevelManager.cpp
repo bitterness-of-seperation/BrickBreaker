@@ -1,10 +1,15 @@
 #include "Managers/LevelManager.h"
 #include "Managers/AssetManager.h"
+#include "Utils/Config.h"
 #include <iostream>
 #include <fstream>
 
 LevelManager::LevelManager() 
-    : currentLevel(1), totalLevels(3), rows(8), columns(10) {
+    : currentLevel(1), totalLevels(3) {
+    // Get rows and columns from config
+    rows = Config::getInstance().getValue("game.brick_rows", 8);
+    columns = Config::getInstance().getValue("game.brick_columns", 10);
+    
     brickSize = sf::Vector2f(80.0f, 30.0f);
     brickPadding = sf::Vector2f(2.0f, 2.0f);
     levelPosition = sf::Vector2f(50.0f, 100.0f);
@@ -39,17 +44,21 @@ std::vector<std::unique_ptr<Brick>> LevelManager::loadLevel(int levelNumber) {
     std::string line;
     int row = 0;
     
+    // 计算实际可用宽度，确保砖块不会超出屏幕
+    float totalAvailableWidth = levelSize.x;
+    float actualBrickWidth = (totalAvailableWidth - (columns - 1) * brickPadding.x) / columns;
+    
     while (std::getline(file, line) && row < rows) {
         for (size_t col = 0; col < line.length() && col < static_cast<size_t>(columns); ++col) {
             char brickType = line[col];
             if (brickType != ' ') {
-                // Create brick
+                // Create brick with adjusted size to fit screen
                 auto brick = std::make_unique<Brick>();
                 brick->setPosition(sf::Vector2f(
-                    levelPosition.x + col * (brickSize.x + brickPadding.x),
+                    levelPosition.x + col * (actualBrickWidth + brickPadding.x),
                     levelPosition.y + row * (brickSize.y + brickPadding.y)
                 ));
-                brick->setSize(sf::Vector2f(brickSize.x, brickSize.y));
+                brick->setSize(sf::Vector2f(actualBrickWidth, brickSize.y));
                 
                 // Set brick properties based on character
                 switch (brickType) {
@@ -107,19 +116,24 @@ bool LevelManager::loadLevel(int levelNumber, std::vector<std::unique_ptr<Brick>
     
     std::string line;
     int row = 0;
-    float brickWidth = 80.0f;
-    float brickHeight = 30.0f;
-    float startX = 50.0f;
-    float startY = 100.0f;
+    float startX = levelPosition.x;
+    float startY = levelPosition.y;
     
-    while (std::getline(file, line) && row < 8) {
-        for (size_t col = 0; col < line.length() && col < 10; ++col) {
+    // 计算实际可用宽度，确保砖块不会超出屏幕
+    float totalAvailableWidth = levelSize.x;
+    float actualBrickWidth = (totalAvailableWidth - (columns - 1) * brickPadding.x) / columns;
+    
+    while (std::getline(file, line) && row < rows) {
+        for (size_t col = 0; col < line.length() && col < static_cast<size_t>(columns); ++col) {
             char brickType = line[col];
             if (brickType != ' ') {
-                // Create brick
+                // Create brick with adjusted size
                 auto brick = std::make_unique<Brick>();
-                brick->setPosition(sf::Vector2f(startX + col * brickWidth, startY + row * brickHeight));
-                brick->setSize(sf::Vector2f(brickWidth - 2, brickHeight - 2));
+                brick->setPosition(sf::Vector2f(
+                    startX + col * (actualBrickWidth + brickPadding.x),
+                    startY + row * (brickSize.y + brickPadding.y)
+                ));
+                brick->setSize(sf::Vector2f(actualBrickWidth - brickPadding.x, brickSize.y - brickPadding.y));
                 
                 // Set brick properties based on character
                 switch (brickType) {
@@ -179,7 +193,7 @@ int LevelManager::getTotalLevels() const {
 }
 
 bool LevelManager::hasNextLevel() const {
-    return currentLevel < totalLevels;
+    return currentLevel < 2;
 }
 
 void LevelManager::setBrickSize(const sf::Vector2f& size) {
@@ -208,12 +222,12 @@ std::vector<std::unique_ptr<Brick>> LevelManager::loadLevelFromFile(const std::s
     }
     
     // Calculate actual brick size, considering level area size and brick spacing
-    float availableWidth = levelSize.x - (columns - 1) * brickPadding.x;
-    float availableHeight = levelSize.y - (rows - 1) * brickPadding.y;
+    float availableWidth = levelSize.x;
+    float availableHeight = levelSize.y;
     
     sf::Vector2f actualBrickSize(
-        availableWidth / columns,
-        availableHeight / rows
+        (availableWidth - (columns - 1) * brickPadding.x) / columns,
+        (availableHeight - (rows - 1) * brickPadding.y) / rows
     );
     
     // Read level data
@@ -251,25 +265,22 @@ std::vector<std::unique_ptr<Brick>> LevelManager::loadLevelFromFile(const std::s
                             brick->setScore(400);
                             break;
                         case 5:
-                            brick->setColor(sf::Color(128, 0, 128)); // purple
+                            brick->setColor(sf::Color(128, 0, 128)); // 紫色
                             brick->setScore(500);
                             break;
                         default:
-                            brick->setColor(sf::Color::White);
-                            brick->setScore(50);
-                            break;
+                            continue; // Skip this brick
                     }
                     
                     // Set brick texture
-                    AssetManager::getInstance()->loadTexture("brick", "resources/textures/brick.png");
                     if (AssetManager::getInstance()->hasTexture("brick")) {
                         brick->setTexture(AssetManager::getInstance()->getTexture("brick"));
                     }
                     
                     bricks.push_back(std::move(brick));
-                }
             }
         }
+    }
     
     file.close();
     return bricks;

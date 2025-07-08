@@ -1,0 +1,10 @@
+ {
+    "files.associations": {
+        "*.cpp": "cpp",
+        "*.h": "cpp"
+    },
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/**",
+        "C:/Program Files/SFML-3.0.0/include"
+    ]
+}

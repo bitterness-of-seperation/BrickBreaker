@@ -1,0 +1,35 @@
+# CMake generation dependency list for this directory.
+C:/Program Files (x86)/mingw64/share/cmake-3.30/Modules/CMakeCXXInformation.cmake
+C:/Program Files (x86)/mingw64/share/cmake-3.30/Modules/CMakeCommonLanguageInclude.cmake
+C:/Program Files (x86)/mingw64/share/cmake-3.30/Modules/CMakeGenericSystem.cmake
+C:/Program Files (x86)/mingw64/share/cmake-3.30/Modules/CMakeInitializeConfigs.cmake
+C:/Program Files (x86)/mingw64/share/cmake-3.30/Modules/CMakeLanguageInformation.cmake
+C:/Program Files (x86)/mingw64/share/cmake-3.30/Modules/CMakeRCInformation.cmake
+C:/Program Files (x86)/mingw64/share/cmake-3.30/Modules/CMakeSystemSpecificInformation.cmake
+C:/Program Files (x86)/mingw64/share/cmake-3.30/Modules/CMakeSystemSpecificInitialize.cmake
+C:/Program Files (x86)/mingw64/share/cmake-3.30/Modules/Compiler/CMakeCommonCompilerMacros.cmake
+C:/Program Files (x86)/mingw64/share/cmake-3.30/Modules/Compiler/MSVC-CXX.cmake
+C:/Program Files (x86)/mingw64/share/cmake-3.30/Modules/Compiler/MSVC.cmake
+C:/Program Files (x86)/mingw64/share/cmake-3.30/Modules/Platform/Windows-Initialize.cmake
+C:/Program Files (x86)/mingw64/share/cmake-3.30/Modules/Platform/Windows-MSVC-CXX.cmake
+C:/Program Files (x86)/mingw64/share/cmake-3.30/Modules/Platform/Windows-MSVC.cmake
+C:/Program Files (x86)/mingw64/share/cmake-3.30/Modules/Platform/Windows.cmake
+C:/Program Files (x86)/mingw64/share/cmake-3.30/Modules/Platform/WindowsPaths.cmake
+C:/Program Files/SFML-3.0.0/lib/cmake/SFML/SFMLAudioSharedTargets-debug.cmake
+C:/Program Files/SFML-3.0.0/lib/cmake/SFML/SFMLAudioSharedTargets-release.cmake
+C:/Program Files/SFML-3.0.0/lib/cmake/SFML/SFMLAudioSharedTargets.cmake
+C:/Program Files/SFML-3.0.0/lib/cmake/SFML/SFMLConfig.cmake
+C:/Program Files/SFML-3.0.0/lib/cmake/SFML/SFMLConfigVersion.cmake
+C:/Program Files/SFML-3.0.0/lib/cmake/SFML/SFMLGraphicsSharedTargets-debug.cmake
+C:/Program Files/SFML-3.0.0/lib/cmake/SFML/SFMLGraphicsSharedTargets-release.cmake
+C:/Program Files/SFML-3.0.0/lib/cmake/SFML/SFMLGraphicsSharedTargets.cmake
+C:/Program Files/SFML-3.0.0/lib/cmake/SFML/SFMLSystemSharedTargets-debug.cmake
+C:/Program Files/SFML-3.0.0/lib/cmake/SFML/SFMLSystemSharedTargets-release.cmake
+C:/Program Files/SFML-3.0.0/lib/cmake/SFML/SFMLSystemSharedTargets.cmake
+C:/Program Files/SFML-3.0.0/lib/cmake/SFML/SFMLWindowSharedTargets-debug.cmake
+C:/Program Files/SFML-3.0.0/lib/cmake/SFML/SFMLWindowSharedTargets-release.cmake
+C:/Program Files/SFML-3.0.0/lib/cmake/SFML/SFMLWindowSharedTargets.cmake
+C:/wmy/Second_Semester_Freshman/shixun/demo/CMakeLists.txt
+C:/wmy/Second_Semester_Freshman/shixun/demo/build/CMakeFiles/3.30.4/CMakeCXXCompiler.cmake
+C:/wmy/Second_Semester_Freshman/shixun/demo/build/CMakeFiles/3.30.4/CMakeRCCompiler.cmake
+C:/wmy/Second_Semester_Freshman/shixun/demo/build/CMakeFiles/3.30.4/CMakeSystem.cmake

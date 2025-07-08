@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <functional>
 #include "Entities/Entity.h"
 #include "Entities/Ball.h"
 #include "Entities/Brick.h"
@@ -11,6 +12,10 @@ class CollisionManager {
 private:
     // 游戏窗口尺寸
     sf::Vector2u windowSize;
+    
+    // 回调函数
+    std::function<void(Brick*)> onBrickHitCallback;
+    std::function<void()> onBallPaddleCollisionCallback;
     
     // 检测球与窗口边界的碰撞
     void checkBallWindowCollision(Ball* ball);
@@ -30,6 +35,10 @@ public:
     
     // 设置窗口尺寸
     void setWindowSize(const sf::Vector2u& size);
+    
+    // 设置回调函数
+    void setOnBrickHitCallback(std::function<void(Brick*)> callback);
+    void setOnBallPaddleCollisionCallback(std::function<void()> callback);
     
     // 更新所有碰撞检测
     void update(Ball* ball, Paddle* paddle, std::vector<std::unique_ptr<Brick>>& bricks);

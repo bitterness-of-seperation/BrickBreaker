@@ -6,6 +6,7 @@ class Paddle : public Entity {
 private:
     float maxSpeed;
     float moveDirection;
+    float windowWidth;  // 添加窗口宽度属性
 
 public:
     Paddle();
@@ -19,4 +20,7 @@ public:
     
     void setMaxSpeed(float speed);
     float getMaxSpeed() const;
+    
+    // 添加设置窗口宽度的方法
+    void setWindowWidth(float width);
 };

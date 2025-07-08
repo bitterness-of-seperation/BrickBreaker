@@ -6,7 +6,7 @@
 #include <ctime>
 #include <iomanip>
 
-// Initialize static members
+// 初始化静态成员
 std::mt19937 Utils::Random::generator;
 std::chrono::steady_clock::time_point Utils::Time::startTime;
 

@@ -11,13 +11,13 @@ PauseState::PauseState(Game* game)
       menuPosition(0.0f, 0.0f) {
 }
 
-void PauseState::init() {
+void PauseState::init() { //设置背景、字体、菜单项
     // 获取窗口大小
     sf::Vector2u windowSize = game->getWindow().getSize();
     
     // 初始化半透明背景
     background.setSize(sf::Vector2f(windowSize));
-    background.setFillColor(sf::Color(255, 255, 255, 150)); // 半透明白色
+    background.setFillColor(sf::Color(20, 20, 50, 255)); // 深蓝
     
     // 加载字体
     try {
@@ -60,7 +60,7 @@ void PauseState::init() {
     updateSelectorPosition();
 }
 
-void PauseState::initMenuItems() {
+void PauseState::initMenuItems() { //设置菜单项
     // 清空现有菜单项
     menuItems.clear();
     
@@ -92,7 +92,7 @@ void PauseState::initMenuItems() {
     }
 }
 
-void PauseState::handleInput(const sf::Event& event) {
+void PauseState::handleInput(const sf::Event& event) { //输入事件
     if (event.is<sf::Event::KeyPressed>()) {
         const auto* keyEvent = event.getIf<sf::Event::KeyPressed>();
         if (keyEvent) {
@@ -122,11 +122,11 @@ void PauseState::handleInput(const sf::Event& event) {
     }
 }
 
-void PauseState::update(float deltaTime) {
+void PauseState::update(float deltaTime) { //暂停不需要频繁更新
     // 暂停状态通常不需要每帧更新逻辑
 }
 
-void PauseState::render(sf::RenderWindow& window) {
+void PauseState::render(sf::RenderWindow& window) { //渲染背景、标题、选择器和菜单项
     // 绘制半透明背景
     window.draw(background);
     

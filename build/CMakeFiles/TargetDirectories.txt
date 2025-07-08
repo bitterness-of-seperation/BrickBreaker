@@ -1,0 +1,3 @@
+C:/wmy/Second_Semester_Freshman/shixun/demo/build/CMakeFiles/BreakoutGame.dir
+C:/wmy/Second_Semester_Freshman/shixun/demo/build/CMakeFiles/ALL_BUILD.dir
+C:/wmy/Second_Semester_Freshman/shixun/demo/build/CMakeFiles/ZERO_CHECK.dir

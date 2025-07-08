@@ -8,6 +8,9 @@ private:
     int score;
     bool breakable;
     sf::Color color;
+    
+    // Helper method to update color based on hit points
+    void updateColorFromHitPoints();
 
 public:
     Brick();

@@ -66,6 +66,14 @@ bool CollisionManager::checkEntityCollision(Entity* a, Entity* b) {
     return intersection.has_value();
 }
 
+void CollisionManager::setOnBrickHitCallback(std::function<void(Brick*)> callback) {
+    onBrickHitCallback = callback;
+}
+
+void CollisionManager::setOnBallPaddleCollisionCallback(std::function<void()> callback) {
+    onBallPaddleCollisionCallback = callback;
+}
+
 void CollisionManager::handleBallBrickCollision(Ball* ball, Brick* brick) {
     if (!ball || !brick) return;
     
@@ -94,8 +102,14 @@ void CollisionManager::handleBallBrickCollision(Ball* ball, Brick* brick) {
     
     // 通知砖块被击中
     brick->onCollision(ball);
+    
     // 通知球碰撞到了砖块
     ball->onCollision(brick);
+    
+    // 调用回调函数
+    if (onBrickHitCallback && !brick->isActive()) {
+        onBrickHitCallback(brick);
+    }
 }
 
 void CollisionManager::handleBallPaddleCollision(Ball* ball, Paddle* paddle) {
@@ -134,6 +148,11 @@ void CollisionManager::handleBallPaddleCollision(Ball* ball, Paddle* paddle) {
         // 通知实体发生了碰撞
         ball->onCollision(paddle);
         paddle->onCollision(ball);
+        
+        // 调用回调函数
+        if (onBallPaddleCollisionCallback) {
+            onBallPaddleCollisionCallback();
+        }
     }
 }
 

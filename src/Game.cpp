@@ -12,15 +12,22 @@ Game::Game() : running(false), paused(false), deltaTime(0.0f) {
 }
 
 Game::~Game() {
+    // Save configuration before exiting
+    Config::getInstance().save();
+    
     // Clear state stack
     while (!states.empty()) {
         states.pop();
     }
 }
 
-void Game::init() {
+void Game::init() { //创建配置、工具、窗口和初始化资源、push状态
     // Load configuration
-    Config::getInstance().load();
+    if (!Config::getInstance().load()) {
+        std::cout << "Failed to load config.ini, using default settings" << std::endl;
+        // Save default configuration
+        Config::getInstance().save();
+    }
     
     // Initialize random number generator
     Utils::Random::init();
@@ -41,11 +48,11 @@ void Game::init() {
         window.create(sf::VideoMode(sf::Vector2u(static_cast<unsigned int>(width), static_cast<unsigned int>(height))), title, sf::Style::Default, sf::State::Windowed);
     }
     
-    // Set vsync
+    // 设置垂直同步
     bool vsync = Config::getInstance().getValue("window.vsync", true);
     window.setVerticalSyncEnabled(vsync);
     
-    // Set frame rate limit
+    // 设置帧率限制
     int frameRateLimit = Config::getInstance().getValue("window.framerate_limit", 60);
     window.setFramerateLimit(frameRateLimit);
     
@@ -59,7 +66,7 @@ void Game::init() {
     running = true;
 }
 
-void Game::initResources() {
+void Game::initResources() { //加载纹理、字体和音效
     // Load textures
     AssetManager::getInstance()->loadTexture("ball", "resources/textures/ball.png");
     AssetManager::getInstance()->loadTexture("paddle", "resources/textures/paddle.png");
@@ -77,12 +84,12 @@ void Game::initResources() {
     AssetManager::getInstance()->createSound("break", "break");
 }
 
-void Game::run() {
+void Game::run() { //主循环:event、update、render
     if (!running) {
         init();
     }
     
-    // Main game loop
+    // 主循环
     while (running && window.isOpen()) {
         // Calculate delta time
         deltaTime = clock.restart().asSeconds();
@@ -98,7 +105,7 @@ void Game::run() {
     }
 }
 
-void Game::handleEvents() {
+void Game::handleEvents() { //state->handleEvents
     auto eventOpt = window.pollEvent();
     while (eventOpt.has_value()) {
         sf::Event event = eventOpt.value();
@@ -117,13 +124,13 @@ void Game::handleEvents() {
     }
 }
 
-void Game::update() {
+void Game::update() { //state->update
     if (!paused && !states.empty()) {
         states.top()->update(deltaTime);
     }
 }
 
-void Game::render() {
+void Game::render() { //state->render
     window.clear(Config::getInstance().getValue("colors.background", sf::Color(20, 20, 50)));
     
     // Render current state
@@ -134,12 +141,15 @@ void Game::render() {
     window.display();
 }
 
-void Game::quit() {
+void Game::quit() { //直接关闭窗口
+    // Save configuration before exiting
+    Config::getInstance().save();
+    
     running = false;
     window.close();
 }
 
-void Game::pause() {
+void Game::pause() { //state->onPause
     paused = true;
     
     if (!states.empty()) {
@@ -147,7 +157,7 @@ void Game::pause() {
     }
 }
 
-void Game::resume() {
+void Game::resume() { //state->onResume
     paused = false;
     
     if (!states.empty()) {

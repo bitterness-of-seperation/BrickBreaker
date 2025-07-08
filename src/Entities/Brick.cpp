@@ -1,5 +1,6 @@
 #include "Entities/Brick.h"
 #include "Entities/Ball.h"
+#include "Utils/Config.h"
 
 Brick::Brick() 
     : Entity(), 
@@ -35,6 +36,9 @@ int Brick::getHitPoints() const {
 
 void Brick::setHitPoints(int points) {
     hitPoints = points;
+    
+    // Update color based on hit points
+    updateColorFromHitPoints();
 }
 
 int Brick::getScore() const {
@@ -57,16 +61,47 @@ void Brick::hit() {
     if (breakable) {
         hitPoints--;
         
-        // Change color based on remaining hit points
+        // Update color based on remaining hit points
         if (hitPoints <= 0) {
             setActive(false); // Brick is destroyed
-        } else if (hitPoints == 1) {
-            setColor(sf::Color::Red);
-        } else if (hitPoints == 2) {
-            setColor(sf::Color::Yellow);
         } else {
-            setColor(sf::Color::Green);
+            updateColorFromHitPoints();
         }
+    }
+}
+
+void Brick::updateColorFromHitPoints() {
+    // Get colors from config or use defaults
+    sf::Color color1 = Config::getInstance().getValue("colors.brick1", sf::Color::Red);
+    sf::Color color2 = Config::getInstance().getValue("colors.brick2", sf::Color::Yellow);
+    sf::Color color3 = Config::getInstance().getValue("colors.brick3", sf::Color::Green);
+    sf::Color color4 = Config::getInstance().getValue("colors.brick4", sf::Color::Blue);
+    sf::Color color5 = Config::getInstance().getValue("colors.brick5", sf::Color(128, 0, 128));
+    
+    // Set color based on hit points
+    switch (hitPoints) {
+        case 1:
+            setColor(color1);
+            break;
+        case 2:
+            setColor(color2);
+            break;
+        case 3:
+            setColor(color3);
+            break;
+        case 4:
+            setColor(color4);
+            break;
+        case 5:
+            setColor(color5);
+            break;
+        default:
+            if (hitPoints > 5) {
+                setColor(color5); // Use color5 for higher hit points
+            } else {
+                setColor(sf::Color::White);
+            }
+            break;
     }
 }
 
