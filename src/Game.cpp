@@ -8,7 +8,7 @@
 #include "Managers/AssetManager.h"
 #include <iostream>
 
-Game::Game() : running(false), paused(false), deltaTime(0.0f) {
+Game::Game() : running(false), paused(false), deltaTime(0.0f), showingSplash(true), splashTimer(0.0f) {
 }
 
 Game::~Game() {
@@ -59,8 +59,8 @@ void Game::init() { //创建配置、工具、窗口和初始化资源、push状
     // Initialize resources
     initResources();
     
-    // Push initial state
-    pushState(std::make_unique<MenuState>(this));
+    // 初始化启动页
+    initSplashScreen();
     
     // Set running flag
     running = true;
@@ -71,6 +71,14 @@ void Game::initResources() { //加载纹理、字体和音效
     AssetManager::getInstance()->loadTexture("ball", "resources/textures/ball.png");
     AssetManager::getInstance()->loadTexture("paddle", "resources/textures/paddle.png");
     AssetManager::getInstance()->loadTexture("brick", "resources/textures/brick.png");
+    AssetManager::getInstance()->loadTexture("start", "resources/textures/start.png");
+    AssetManager::getInstance()->loadTexture("background", "resources/textures/background.png");
+    
+    // 加载结束游戏相关纹理
+    AssetManager::getInstance()->loadTexture("endGame_back", "resources/textures/endGame_back.png");
+    AssetManager::getInstance()->loadTexture("endGame_star_left", "resources/textures/endGame_star_left.png");
+    AssetManager::getInstance()->loadTexture("endGame_star_centre", "resources/textures/endGame_star_centre.png");
+    AssetManager::getInstance()->loadTexture("endGame_star_right", "resources/textures/endGame_star_right.png");
     
     // Load font
     AssetManager::getInstance()->loadFont("arial", "resources/fonts/arial.ttf");
@@ -78,10 +86,39 @@ void Game::initResources() { //加载纹理、字体和音效
     // Load sound buffers
     AssetManager::getInstance()->loadSoundBuffer("hit", "resources/sounds/hit.wav");
     AssetManager::getInstance()->loadSoundBuffer("break", "resources/sounds/break.wav");
+    AssetManager::getInstance()->loadSoundBuffer("ball_windows", "resources/sounds/ball_windows.wav");
     
-    // Create
+    // Create sounds
     AssetManager::getInstance()->createSound("hit", "hit");
     AssetManager::getInstance()->createSound("break", "break");
+    AssetManager::getInstance()->createSound("ball_windows", "ball_windows");
+}
+
+void Game::initSplashScreen() {
+    // 初始化启动页
+    splashTexture = std::make_unique<sf::Texture>(AssetManager::getInstance()->getTexture("start"));
+    splashSprite = std::make_unique<sf::Sprite>(*splashTexture);
+    
+    // 设置启动页居中显示
+    sf::Vector2u windowSize = window.getSize();
+    sf::Vector2u textureSize = splashTexture->getSize();
+    
+    // 计算缩放比例，使图片适应窗口
+    float scaleX = static_cast<float>(windowSize.x) / textureSize.x;
+    float scaleY = static_cast<float>(windowSize.y) / textureSize.y;
+    float scale = std::min(scaleX, scaleY);
+    
+    splashSprite->setScale({scale, scale});
+    
+    // 居中显示
+    sf::FloatRect bounds = splashSprite->getGlobalBounds();
+    splashSprite->setOrigin({bounds.size.x / 2.0f, bounds.size.y / 2.0f});
+    splashSprite->setPosition({windowSize.x / 2.0f, windowSize.y / 2.0f});
+    
+    // 设置启动页显示时间（秒）
+    splashDuration = 3.0f;
+    splashTimer = 0.0f;
+    showingSplash = true;
 }
 
 void Game::run() { //主循环:event、update、render
@@ -93,6 +130,16 @@ void Game::run() { //主循环:event、update、render
     while (running && window.isOpen()) {
         // Calculate delta time
         deltaTime = clock.restart().asSeconds();
+        
+        // 更新启动页计时器
+        if (showingSplash) {
+            splashTimer += deltaTime;
+            if (splashTimer >= splashDuration) {
+                showingSplash = false;
+                // 启动页结束后，推入菜单状态
+                pushState(std::make_unique<MenuState>(this));
+            }
+        }
         
         // Handle events
         handleEvents();
@@ -115,8 +162,13 @@ void Game::handleEvents() { //state->handleEvents
             quit();
         }
         
-        // Pass events to current state
-        if (!states.empty()) {
+        // 如果显示启动页，任意键跳过
+        if (showingSplash && event.is<sf::Event::KeyPressed>()) {
+            showingSplash = false;
+            pushState(std::make_unique<MenuState>(this));
+        }
+        // 如果不显示启动页，则正常处理事件
+        else if (!showingSplash && !states.empty()) {
             states.top()->handleInput(event);
         }
         
@@ -125,6 +177,11 @@ void Game::handleEvents() { //state->handleEvents
 }
 
 void Game::update() { //state->update
+    // 如果显示启动页，不更新游戏状态
+    if (showingSplash) {
+        return;
+    }
+    
     if (!paused && !states.empty()) {
         states.top()->update(deltaTime);
     }
@@ -133,8 +190,12 @@ void Game::update() { //state->update
 void Game::render() { //state->render
     window.clear(Config::getInstance().getValue("colors.background", sf::Color(20, 20, 50)));
     
-    // Render current state
-    if (!states.empty()) {
+    // 如果显示启动页，渲染启动页
+    if (showingSplash) {
+        window.draw(*splashSprite);
+    }
+    // 否则渲染当前状态
+    else if (!states.empty()) {
         states.top()->render(window);
     }
     

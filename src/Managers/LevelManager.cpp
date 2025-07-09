@@ -193,7 +193,7 @@ int LevelManager::getTotalLevels() const {
 }
 
 bool LevelManager::hasNextLevel() const {
-    return currentLevel < 2;
+    return currentLevel < totalLevels - 1;
 }
 
 void LevelManager::setBrickSize(const sf::Vector2f& size) {

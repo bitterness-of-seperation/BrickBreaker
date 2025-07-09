@@ -1,6 +1,7 @@
 #include "States/PauseState.h"
 #include "Game.h"
 #include "States/PlayState.h"
+#include "States/MenuState.h"
 #include "Managers/AssetManager.h"
 #include <iostream>
 
@@ -70,19 +71,12 @@ void PauseState::initMenuItems() { //设置菜单项
     });
     
     addMenuItem("Restart", [this]() {
-        // Pop pause state
-        game->popState();
-        
-        // Get PlayState and restart game
-        if (auto playState = dynamic_cast<PlayState*>(game->getCurrentState())) {
-            playState->startNewGame();
-        }
+        game->changeState(std::make_unique<PlayState>(game));
     });
     
     addMenuItem("Main Menu", [this]() {
         // Pop pause state and game state to return to main menu
-        game->popState(); // Pop pause state
-        game->popState(); // Pop game state
+        game->changeState(std::make_unique<MenuState>(game));
     });
     
     // 设置默认选择项

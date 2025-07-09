@@ -20,6 +20,7 @@ set(SOURCES
     src/Managers/CollisionManager.cpp
     src/Managers/LevelManager.cpp
     src/States/GameOverState.cpp
+    src/States/HelpState.cpp
     src/States/MenuState.cpp
     src/States/PauseState.cpp
     src/States/PlayState.cpp

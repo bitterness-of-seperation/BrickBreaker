@@ -10,7 +10,10 @@ GameOverState::GameOverState(Game* game, int score)
       selectedItemIndex(0),
       itemSpacing(50.0f),
       menuPosition(0.0f, 0.0f),
-      finalScore(score) {
+      finalScore(score),
+      showingStars(true),
+      starsTimer(0.0f),
+      starsDuration(5.0f) {
 }
 
 void GameOverState::init() { //设置背景、字体、菜单项
@@ -69,8 +72,79 @@ void GameOverState::init() { //设置背景、字体、菜单项
     // 初始化菜单项
     initMenuItems();
     
+    // 初始化结束游戏界面
+    initEndGameScreen();
+    
     // 更新选择器位置
     updateSelectorPosition();
+}
+
+// 星星缩放比例
+float scale = 0.0f;
+void GameOverState::initEndGameScreen() {
+    // 获取窗口大小
+    sf::Vector2u windowSize = game->getWindow().getSize();
+    
+    // 初始化背景
+    if (AssetManager::getInstance()->hasTexture("endGame_back")) {
+        endGameBackSprite = std::make_unique<sf::Sprite>(AssetManager::getInstance()->getTexture("endGame_back"));
+        
+        // 调整背景图片大小以适应窗口
+        sf::Vector2u textureSize = endGameBackSprite->getTexture().getSize();
+        float scaleX = static_cast<float>(windowSize.x) / textureSize.x;
+        float scaleY = static_cast<float>(windowSize.y) / textureSize.y;
+        scale = std::min(scaleX, scaleY) * 0.8f; // 稍微缩小一点，不要占满整个窗口
+        
+        endGameBackSprite->setScale({scale, scale});
+        
+        // 居中显示
+        sf::FloatRect bounds = endGameBackSprite->getLocalBounds();
+        endGameBackSprite->setOrigin({bounds.size.x / 2.0f, bounds.size.y / 2.0f});
+        endGameBackSprite->setPosition({windowSize.x / 2.0f, windowSize.y / 2.0f});
+    } 
+    
+    // 左侧星星
+    if (AssetManager::getInstance()->hasTexture("endGame_star_left")) {
+        starLeftSprite = std::make_unique<sf::Sprite>(AssetManager::getInstance()->getTexture("endGame_star_left"));
+        
+        // 相同比例
+        starLeftSprite->setScale({scale, scale});
+        
+        // 居中
+        sf::FloatRect bounds = starLeftSprite->getLocalBounds();
+        starLeftSprite->setOrigin({bounds.size.x / 2.0f, bounds.size.y / 2.0f});
+        starLeftSprite->setPosition({windowSize.x / 2.0f, windowSize.y / 2.0f});
+    } 
+    
+    // 中间星星
+    if (AssetManager::getInstance()->hasTexture("endGame_star_centre")) {
+        starMiddleSprite = std::make_unique<sf::Sprite>(AssetManager::getInstance()->getTexture("endGame_star_centre"));
+        
+        // 相同比例
+        starMiddleSprite->setScale({scale, scale});
+        
+        // 居中
+        sf::FloatRect bounds = starMiddleSprite->getLocalBounds();
+        starMiddleSprite->setOrigin({bounds.size.x / 2.0f, bounds.size.y / 2.0f});
+        starMiddleSprite->setPosition({windowSize.x / 2.0f, windowSize.y / 2.0f});
+    } 
+    
+    // 右侧星星
+    if (AssetManager::getInstance()->hasTexture("endGame_star_right")) {
+        starRightSprite = std::make_unique<sf::Sprite>(AssetManager::getInstance()->getTexture("endGame_star_right"));
+        
+        // 相同比例
+        starRightSprite->setScale({scale, scale});
+        
+        // 居中
+        sf::FloatRect bounds = starRightSprite->getLocalBounds();
+        starRightSprite->setOrigin({bounds.size.x / 2.0f, bounds.size.y / 2.0f});
+        starRightSprite->setPosition({windowSize.x / 2.0f, windowSize.y / 2.0f});
+    } 
+    
+    // 设置初始状态
+    showingStars = true;
+    starsTimer = 0.0f;
 }
 
 void GameOverState::initMenuItems() { //设置菜单项
@@ -103,6 +177,12 @@ void GameOverState::handleInput(const sf::Event& event) { //输入事件
     if (event.is<sf::Event::KeyPressed>()) {
         const auto* keyEvent = event.getIf<sf::Event::KeyPressed>();
         if (keyEvent) {
+            // 如果显示星星界面，任意键跳过
+            if (showingStars) {
+                showingStars = false;
+                return;
+            }
+            
             switch (keyEvent->code) {
                 case sf::Keyboard::Key::Up:
                 moveUp();
@@ -128,25 +208,78 @@ void GameOverState::handleInput(const sf::Event& event) { //输入事件
     }
 }
 
-void GameOverState::update(float deltaTime) { //游戏结束不需要频繁更新
-    // GameOverState通常不需要每帧更新逻辑
+void GameOverState::update(float deltaTime) { //更新星星界面计时器
+    // 更新星星界面计时器
+    if (showingStars) {
+        starsTimer += deltaTime;
+        if (starsTimer >= starsDuration) {
+            showingStars = false;
+        }
+    }
 }
 
 void GameOverState::render(sf::RenderWindow& window) { //渲染背景、标题、分数、选择器和菜单项
-    // 绘制背景
-    window.draw(background);
-    
-    // 绘制标题
-    window.draw(*titleText);
-    
-    // 绘制分数
-    window.draw(*scoreText);
-    
-    // 绘制选择器和菜单项
-    window.draw(selector);
-    
-    for (const auto& item : menuItems) {
-        window.draw(item.displayText);
+    // 如果显示星星界面
+    if (showingStars && endGameBackSprite) {
+        // 绘制背景
+        window.draw(*endGameBackSprite);
+        
+        // 根据关卡数显示星星
+        int stars = 0;
+        if (finalScore >= 15000) {
+            stars = 3;
+        } else if (finalScore >= 10000) {
+            stars = 2;
+        } else {
+            stars = 1;
+        }
+        
+        // 显示对应数量的星星
+        if (stars >= 1 && starLeftSprite) {
+            window.draw(*starLeftSprite);
+        }
+        if (stars >= 2 && starMiddleSprite) {
+            window.draw(*starMiddleSprite);
+        }
+        if (stars >= 3 && starRightSprite) {
+            window.draw(*starRightSprite);
+        }
+        
+        // 显示分数
+        if (scoreText) {
+            // 更新分数文本
+            scoreText->setString("FINAL SCORE: " + std::to_string(finalScore));
+            
+            // 设置文本样式
+            scoreText->setCharacterSize(40);
+            scoreText->setFillColor(sf::Color::Yellow);
+            scoreText->setStyle(sf::Text::Bold);
+            
+            // 居中显示在背景板下方
+            sf::FloatRect textBounds = scoreText->getLocalBounds();
+            scoreText->setOrigin({textBounds.size.x / 2.0f, textBounds.size.y / 2.0f});
+            scoreText->setPosition({window.getSize().x / 2.0f, window.getSize().y * 0.55f});
+            
+            window.draw(*scoreText);
+        }
+    }
+    // 否则显示常规游戏结束界面
+    else {
+        // 绘制背景
+        window.draw(background);
+        
+        // 绘制标题
+        window.draw(*titleText);
+        
+        // 绘制分数
+        // window.draw(*scoreText);
+        
+        // 绘制选择器和菜单项
+        window.draw(selector);
+        
+        for (const auto& item : menuItems) {
+            window.draw(item.displayText);
+        }
     }
 }
 

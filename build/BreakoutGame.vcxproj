@@ -346,6 +346,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\wmy\Second_Semester_Freshman\shixun\demo\src\Managers\CollisionManager.cpp" />
     <ClCompile Include="C:\wmy\Second_Semester_Freshman\shixun\demo\src\Managers\LevelManager.cpp" />
     <ClCompile Include="C:\wmy\Second_Semester_Freshman\shixun\demo\src\States\GameOverState.cpp" />
+    <ClCompile Include="C:\wmy\Second_Semester_Freshman\shixun\demo\src\States\HelpState.cpp" />
     <ClCompile Include="C:\wmy\Second_Semester_Freshman\shixun\demo\src\States\MenuState.cpp" />
     <ClCompile Include="C:\wmy\Second_Semester_Freshman\shixun\demo\src\States\PauseState.cpp" />
     <ClCompile Include="C:\wmy\Second_Semester_Freshman\shixun\demo\src\States\PlayState.cpp" />

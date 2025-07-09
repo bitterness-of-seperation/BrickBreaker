@@ -40,8 +40,22 @@ private:
     // 菜单项位置
     sf::Vector2f menuPosition;
     
+    // 结束游戏界面相关
+    bool showingStars;           // 是否显示星星界面
+    float starsTimer;            // 星星界面计时器
+    float starsDuration;         // 星星界面显示时长
+    
+    // 背景和星星精灵
+    std::unique_ptr<sf::Sprite> endGameBackSprite;  // 结束游戏背景
+    std::unique_ptr<sf::Sprite> starLeftSprite;     // 左侧星星
+    std::unique_ptr<sf::Sprite> starMiddleSprite;   // 中间星星
+    std::unique_ptr<sf::Sprite> starRightSprite;    // 右侧星星
+    
     // 初始化菜单项
     void initMenuItems();
+    
+    // 初始化结束游戏界面
+    void initEndGameScreen();
     
     // 更新选择器位置
     void updateSelectorPosition();

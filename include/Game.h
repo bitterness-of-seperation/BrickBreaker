@@ -1,39 +1,32 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <memory>
+#include <SFML/Audio.hpp>
 #include <stack>
-#include <string>
+#include <memory>
 #include "GameState.h"
-#include "Utils/Config.h"
 
 class Game {
 private:
-    // 窗口
     sf::RenderWindow window;
-    
-    // 游戏状态栈
+    sf::Clock clock;
     std::stack<std::unique_ptr<GameState>> states;
-    
-    // 游戏循环控制
     bool running;
     bool paused;
-    
-    // 帧率控制
-    sf::Clock clock;
     float deltaTime;
     
-    // 资源初始化
+    // 启动页相关
+    bool showingSplash;
+    float splashTimer;
+    float splashDuration;
+    std::unique_ptr<sf::Texture> splashTexture; //改为指针
+    std::unique_ptr<sf::Sprite> splashSprite;
+    
+    // 初始化资源
     void initResources();
     
-    // 处理事件
-    void handleEvents();
-    
-    // 更新游戏逻辑
-    void update();
-    
-    // 渲染
-    void render();
+    // 初始化启动页
+    void initSplashScreen();
 
 public:
     Game();
@@ -44,6 +37,15 @@ public:
     
     // 运行游戏
     void run();
+    
+    // 处理事件
+    void handleEvents();
+    
+    // 更新游戏逻辑
+    void update();
+    
+    // 渲染
+    void render();
     
     // 退出游戏
     void quit();
@@ -60,12 +62,12 @@ public:
     void changeState(std::unique_ptr<GameState> state);
     GameState* getCurrentState();
     
-    // 获取窗口引用
+    // 获取窗口
     sf::RenderWindow& getWindow();
     
-    // 获取帧率
+    // 获取FPS
     float getFPS() const;
     
-    // 获取Delta Time
+    // 获取帧间隔时间
     float getDeltaTime() const;
 };

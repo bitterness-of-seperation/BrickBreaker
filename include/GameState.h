@@ -18,7 +18,7 @@ public:
     virtual void update(float deltaTime) = 0;
     virtual void render(sf::RenderWindow& window) = 0;
     
-    // 状态切换事件
+    // 状态切换事件：暂未使用
     virtual void onEnter() {}
     virtual void onExit() {}
     virtual void onPause() {}

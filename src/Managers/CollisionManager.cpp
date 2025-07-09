@@ -1,4 +1,5 @@
 #include "Managers/CollisionManager.h"
+#include "Managers/AssetManager.h"
 #include <algorithm>
 #include <cmath>
 
@@ -43,15 +44,21 @@ void CollisionManager::checkBallWindowCollision(Ball* ball) {
     if (pos.x <= 0) {
         ball->setPosition({radius, pos.y});
         ball->reverseX();
+        // 播放球碰撞窗口的音效
+        AssetManager::getInstance()->playSound("ball_windows");
     } else if (pos.x + radius * 2 >= windowSize.x) {
         ball->setPosition({windowSize.x - radius * 2, pos.y});
         ball->reverseX();
+        // 播放球碰撞窗口的音效
+        AssetManager::getInstance()->playSound("ball_windows");
     }
     
     // 上边界碰撞
     if (pos.y <= 0) {
         ball->setPosition({pos.x, 0});
         ball->reverseY();
+        // 播放球碰撞窗口的音效
+        AssetManager::getInstance()->playSound("ball_windows");
     }
     
     // 注意：下边界不反弹，这是游戏失败的条件

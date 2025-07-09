@@ -6,13 +6,14 @@
 #include "Utils/Config.h"
 #include <iostream>
 
-PlayState::PlayState(Game* game)
+PlayState::PlayState(Game* game) 
     : GameState(game),
       score(0),
       lives(Config::getInstance().getValue("game.initial_lives", 3)),
       ballLaunched(false),
       gameOver(false),
-      levelCompleted(false) {
+      levelCompleted(false),
+      justGameOver(false) {
 }
 
 void PlayState::init() { //设置碰撞管理、关卡管理和初始化游戏
@@ -129,6 +130,7 @@ void PlayState::initGame() { //创建实体和更新ui
     levelCompleted = false;
     score = 0;
     lives = Config::getInstance().getValue("game.initial_lives", 3);
+    justGameOver = false;
     
     // Update UI
     updateUI();
@@ -139,6 +141,7 @@ void PlayState::handleInput(const sf::Event& event) { //输入事件
         const auto* keyEvent = event.getIf<sf::Event::KeyPressed>();
         if (keyEvent) {
             switch (keyEvent->code) {
+                case sf::Keyboard::Key::Enter:
                 case sf::Keyboard::Key::Space:
                     if (!ballLaunched && !gameOver && !levelCompleted) {
                         launchBall();
@@ -146,10 +149,6 @@ void PlayState::handleInput(const sf::Event& event) { //输入事件
                         // Load next level
                         loadNextLevel();
                     } 
-                    break;
-                
-                case sf::Keyboard::Key::Escape:
-                    game->pushState(std::make_unique<PauseState>(game));
                     break;
                 
                 case sf::Keyboard::Key::P:
@@ -177,6 +176,13 @@ void PlayState::handleInput(const sf::Event& event) { //输入事件
 }
 
 void PlayState::update(float deltaTime) { //更新实体和ui
+    // 如果游戏刚结束，切换到GameOverState
+    if (gameOver && !justGameOver) {
+        justGameOver = true;
+        game->pushState(std::make_unique<GameOverState>(game, score));
+        return;
+    }
+    
     if (gameOver || levelCompleted) {
         return;
     }
@@ -223,9 +229,24 @@ void PlayState::update(float deltaTime) { //更新实体和ui
 }
 
 void PlayState::render(sf::RenderWindow& window) { //渲染实体和ui
-    // Draw background with color from config
-    sf::Color bgColor = Config::getInstance().getValue("colors.background", sf::Color(20, 20, 50));
-    window.clear(bgColor);
+    // 绘制背景图片
+    if (AssetManager::getInstance()->hasTexture("background")) {
+        sf::Sprite backgroundSprite(AssetManager::getInstance()->getTexture("background"));
+        
+        // 调整背景图片大小以适应窗口
+        sf::Vector2u windowSize = window.getSize();
+        sf::Vector2u textureSize = backgroundSprite.getTexture().getSize();
+        
+        float scaleX = static_cast<float>(windowSize.x) / textureSize.x;
+        float scaleY = static_cast<float>(windowSize.y) / textureSize.y;
+        backgroundSprite.setScale({scaleX, scaleY});
+        
+        window.draw(backgroundSprite);
+    } else {
+        // 如果没有背景图片，使用配置中的颜色
+        sf::Color bgColor = Config::getInstance().getValue("colors.background", sf::Color(20, 20, 50));
+        window.clear(bgColor);
+    }
     
     // Draw entities
     paddle->render(window);
@@ -371,6 +392,7 @@ void PlayState::restartGame() {
     gameOver = false;
     levelCompleted = false;
     ballLaunched = false;
+    justGameOver = false;
     
     // Load first level
     loadLevel(0);

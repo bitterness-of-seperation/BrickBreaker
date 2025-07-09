@@ -29,6 +29,7 @@ private:
     bool ballLaunched;//球发射
     bool gameOver;
     bool levelCompleted;
+    bool justGameOver; // 标记游戏是否刚刚结束
     
     // UI元素
     sf::Font font;

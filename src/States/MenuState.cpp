@@ -1,6 +1,7 @@
 #include "States/MenuState.h"
 #include "Game.h"
 #include "States/PlayState.h"
+#include "States/HelpState.h"
 #include "Managers/AssetManager.h"
 #include <iostream>
 
@@ -73,9 +74,8 @@ void MenuState::initMenuItems() { //设置菜单项
         game->changeState(std::move(playState));
     });
     
-    addMenuItem("Settings", [this]() {
-        // Switch to settings state here
-        std::cout << "Settings menu (to be implemented)" << std::endl;
+    addMenuItem("Help", [this]() {
+        game->changeState(std::make_unique<HelpState>(game));
     });
     
     addMenuItem("Exit", [this]() {

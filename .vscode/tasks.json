@@ -21,6 +21,7 @@
                 "${workspaceFolder}/src/States/MenuState.cpp",
                 "${workspaceFolder}/src/States/PauseState.cpp",
                 "${workspaceFolder}/src/States/PlayState.cpp",
+                "${workspaceFolder}/src/States/HelpState.cpp",
                 "${workspaceFolder}/src/Utils/Config.cpp",
                 "${workspaceFolder}/src/Utils/Utils.cpp",
                 "-o",
