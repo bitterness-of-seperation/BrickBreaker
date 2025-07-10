@@ -15,7 +15,7 @@ class Game;
 class PlayState : public GameState {
 private:
     // 游戏实体
-    std::unique_ptr<Ball> ball;
+    std::vector<std::unique_ptr<Ball>> balls;  // 支持多球
     std::unique_ptr<Paddle> paddle;
     std::vector<std::unique_ptr<Brick>> bricks;
     
@@ -31,12 +31,22 @@ private:
     bool levelCompleted;
     bool justGameOver; // 标记游戏是否刚刚结束
     
+    // 奖励机制相关
+    bool multiballEnabled;
+    int maxBalls;
+    int ballSpawnChance;
+    
+    // 挡板移动控制
+    bool paddleMovingLeft;
+    bool paddleMovingRight;
+    
     // UI元素
     sf::Font font;
     std::unique_ptr<sf::Text> scoreText;   // 使用指针避免默认构造函数
     std::unique_ptr<sf::Text> livesText;   // 使用指针避免默认构造函数
-    std::unique_ptr<sf::Text> messageText; // 使用指针避免默认构造函数
-    
+    std::unique_ptr<sf::Text> messageText1; // 使用指针避免默认构造函数
+    std::unique_ptr<sf::Text> messageText2; // 使用指针避免默认构造函数
+
     // 初始化游戏
     void initGame();
     
@@ -57,6 +67,14 @@ private:
     
     // 重新开始游戏
     void restartGame();
+    
+    // 奖励机制相关方法
+    void loadRewardSettings();
+    void trySpawnNewBall();
+    Ball* createNewBall(const sf::Vector2f& position, const sf::Vector2f& velocity);
+    
+    // 存档相关方法
+    bool loadGameState();
 
 public:
     PlayState(Game* game);
@@ -83,4 +101,5 @@ public:
 
     // 添加分数
     void addScore(int points);
+    void saveGameState() const;
 };

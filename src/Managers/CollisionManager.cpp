@@ -35,6 +35,34 @@ void CollisionManager::update(Ball* ball, Paddle* paddle, std::vector<std::uniqu
     }
 }
 
+// 多球碰撞检测方法
+void CollisionManager::update(std::vector<std::unique_ptr<Ball>>& balls, Paddle* paddle, std::vector<std::unique_ptr<Brick>>& bricks) {
+    if (!paddle || !paddle->isActive() || balls.empty()) {
+        return;
+    }
+    
+    // 遍历所有球，进行碰撞检测
+    for (auto& ball : balls) {
+        if (ball && ball->isActive()) {
+            // 检测球与窗口边界的碰撞
+            checkBallWindowCollision(ball.get());
+            
+            // 检测球与挡板的碰撞
+            if (checkEntityCollision(ball.get(), paddle)) {
+                handleBallPaddleCollision(ball.get(), paddle);
+            }
+            
+            // 检测球与砖块的碰撞
+            for (auto& brick : bricks) {
+                if (brick->isActive() && checkEntityCollision(ball.get(), brick.get())) {
+                    handleBallBrickCollision(ball.get(), brick.get());
+                    break; // 一次只处理一个碰撞，避免多次反弹
+                }
+            }
+        }
+    }
+}
+
 void CollisionManager::checkBallWindowCollision(Ball* ball) {
     sf::Vector2f pos = ball->getPosition();
     sf::Vector2f vel = ball->getVelocity();

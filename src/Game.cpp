@@ -203,8 +203,24 @@ void Game::render() { //state->render
 }
 
 void Game::quit() { //直接关闭窗口
+    // 保存游戏状态
+    if (!states.empty()) {
+        GameState* currentState = states.top().get();
+        PlayState* playState = dynamic_cast<PlayState*>(currentState);
+        if (playState) {
+            std::cout << "Saving game state before exit..." << std::endl;
+            playState->saveGameState();
+        } else {
+            std::cout << "Current state is not PlayState, no game state to save" << std::endl;
+        }
+    } else {
+        std::cout << "No active game states, nothing to save" << std::endl;
+    }
+    
     // Save configuration before exiting
-    Config::getInstance().save();
+    std::cout << "Saving configuration..." << std::endl;
+    bool configSaved = Config::getInstance().save();
+    std::cout << "Configuration save " << (configSaved ? "successful" : "failed") << std::endl;
     
     running = false;
     window.close();

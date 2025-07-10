@@ -7,6 +7,9 @@
     <ClCompile Include="C:\wmy\Second_Semester_Freshman\shixun\demo\src\Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\wmy\Second_Semester_Freshman\shixun\demo\src\GameState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\wmy\Second_Semester_Freshman\shixun\demo\src\Entities\Ball.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

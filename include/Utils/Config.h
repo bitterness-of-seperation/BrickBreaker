@@ -91,6 +91,32 @@ T Config::getValue(const std::string& key, const T& defaultValue) const {
             return std::any_cast<T>(it->second);
         } catch (const std::bad_any_cast&) {
             std::cerr << "Config: Type conversion error, key: " << key << std::endl;
+            
+            // 特殊处理浮点数和整数的转换
+            if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>) {
+                try {
+                    // 尝试从整数转换
+                    if (it->second.type() == typeid(int)) {
+                        return static_cast<T>(std::any_cast<int>(it->second));
+                    }
+                } catch (...) {
+                    // 忽略转换错误
+                }
+            }
+            else if constexpr (std::is_same_v<T, int>) {
+                try {
+                    // 尝试从浮点数转换
+                    if (it->second.type() == typeid(float)) {
+                        return static_cast<T>(std::any_cast<float>(it->second));
+                    }
+                    else if (it->second.type() == typeid(double)) {
+                        return static_cast<T>(std::any_cast<double>(it->second));
+                    }
+                } catch (...) {
+                    // 忽略转换错误
+                }
+            }
+            
             return defaultValue;
         }
     }

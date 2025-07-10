@@ -338,6 +338,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   <ItemGroup>
     <ClCompile Include="C:\wmy\Second_Semester_Freshman\shixun\demo\src\main.cpp" />
     <ClCompile Include="C:\wmy\Second_Semester_Freshman\shixun\demo\src\Game.cpp" />
+    <ClCompile Include="C:\wmy\Second_Semester_Freshman\shixun\demo\src\GameState.cpp" />
     <ClCompile Include="C:\wmy\Second_Semester_Freshman\shixun\demo\src\Entities\Ball.cpp" />
     <ClCompile Include="C:\wmy\Second_Semester_Freshman\shixun\demo\src\Entities\Brick.cpp" />
     <ClCompile Include="C:\wmy\Second_Semester_Freshman\shixun\demo\src\Entities\Entity.cpp" />

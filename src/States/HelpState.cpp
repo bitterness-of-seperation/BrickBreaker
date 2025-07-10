@@ -98,6 +98,9 @@ void HelpState::initMenuItems() { //设置菜单项
     addMenuItem("Easy", [this]() {
         // 设置简单模式的球速度
         Config::getInstance().setValue("game.ball_speed", 200.0f);
+        Config::getInstance().setValue("game.paddle_speed", 200.0f);
+        Config::getInstance().setValue("reward.max_balls", 10);
+        Config::getInstance().setValue("reward.ball_spawn_chance", 50);
         Config::getInstance().save();
     });
     
@@ -105,6 +108,9 @@ void HelpState::initMenuItems() { //设置菜单项
     addMenuItem("Hard", [this]() {
         // 设置困难模式的球速度
         Config::getInstance().setValue("game.ball_speed", 400.0f);
+        Config::getInstance().setValue("game.paddle_speed", 400.0f);
+        Config::getInstance().setValue("reward.max_balls", 5);
+        Config::getInstance().setValue("reward.ball_spawn_chance", 30);
         Config::getInstance().save();
     });
     

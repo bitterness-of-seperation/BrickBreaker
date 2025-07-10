@@ -43,6 +43,9 @@ public:
     // 更新所有碰撞检测
     void update(Ball* ball, Paddle* paddle, std::vector<std::unique_ptr<Brick>>& bricks);
     
+    // 更新多球碰撞检测
+    void update(std::vector<std::unique_ptr<Ball>>& balls, Paddle* paddle, std::vector<std::unique_ptr<Brick>>& bricks);
+    
     // 检测球是否掉落（游戏失败条件）
     bool isBallLost(const Ball* ball) const;
 };

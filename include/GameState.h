@@ -8,8 +8,8 @@ class Game;
 class GameState {
 protected:
     Game* game;
-
 public:
+    static int currentLevel;
     GameState(Game* game) : game(game) {}
     virtual ~GameState() = default;
     
@@ -23,4 +23,5 @@ public:
     virtual void onExit() {}
     virtual void onPause() {}
     virtual void onResume() {}
+
 };

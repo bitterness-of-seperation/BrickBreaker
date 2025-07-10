@@ -17,6 +17,7 @@
                 "${workspaceFolder}/src/Managers/AssetManager.cpp",
                 "${workspaceFolder}/src/Managers/CollisionManager.cpp",
                 "${workspaceFolder}/src/Managers/LevelManager.cpp",
+                "${workspaceFolder}/src/GameState.cpp",
                 "${workspaceFolder}/src/States/GameOverState.cpp",
                 "${workspaceFolder}/src/States/MenuState.cpp",
                 "${workspaceFolder}/src/States/PauseState.cpp",

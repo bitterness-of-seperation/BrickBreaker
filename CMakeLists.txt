@@ -12,6 +12,7 @@ find_package(SFML 3.0 REQUIRED COMPONENTS Graphics Window System Audio)
 set(SOURCES
     src/main.cpp
     src/Game.cpp
+    src/GameState.cpp
     src/Entities/Ball.cpp
     src/Entities/Brick.cpp
     src/Entities/Entity.cpp

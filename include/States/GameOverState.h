@@ -80,4 +80,5 @@ public:
     
     // 设置最终分数
     void setFinalScore(int score);
+
 };

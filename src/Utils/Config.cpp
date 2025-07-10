@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <cctype>
 #include <regex>
+#include <cerrno>
+#include <cstring>
 
 // 初始化静态成员
 std::unique_ptr<Config> Config::instance = nullptr;
@@ -32,6 +34,10 @@ void Config::initDefaults() {
     setValue("game.initial_lives", 10);
     setValue("game.brick_rows", 5);
     setValue("game.brick_columns", 10);
+    
+    // 奖励机制设置
+    setValue("reward.max_balls", 3);
+    setValue("reward.ball_spawn_chance", 30);
     
     // 颜色设置
     setValue("colors.background", sf::Color(20, 20, 50));
@@ -88,9 +94,10 @@ bool Config::loadFromFile(const std::string& filename) {
 }
 
 bool Config::saveToFile(const std::string& filename) const {
-    std::ofstream file(filename);
+    std::ofstream file(filename, std::ios::out | std::ios::trunc);
     if (!file.is_open()) {
         std::cerr << "cannot create config file: " << filename << std::endl;
+        std::cerr << "Error: " << std::strerror(errno) << std::endl;
         return false;
     }
     
@@ -235,6 +242,22 @@ void Config::parseLine(const std::string& line) {
         } else if (std::count(valueStr.begin(), valueStr.end(), ',') == 3) {
             // Color
             setValue(key, convertColor(valueStr));
+        }
+    } else if (key.find("save.paddle_x") == 0 || 
+               key.find("save.paddle_y") == 0 || 
+               key.find("save.ball") != std::string::npos) {
+        // 这些键应该总是被解析为浮点数
+        try {
+            float floatValue = std::stof(valueStr);
+            setValue(key, floatValue);
+        } catch (const std::exception&) {
+            std::cerr << "Config: Type conversion error, key: " << key << std::endl;
+            // 为这些关键值设置默认值，避免游戏崩溃
+            if (key.find("_x") != std::string::npos || key.find("_y") != std::string::npos) {
+                setValue(key, 400.0f); // 默认位置
+            } else if (key.find("_vx") != std::string::npos || key.find("_vy") != std::string::npos) {
+                setValue(key, 0.0f);  // 默认速度
+            }
         }
     } else if (valueStr.find('.') != std::string::npos) {
         // 浮点数

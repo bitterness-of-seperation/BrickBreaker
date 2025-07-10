@@ -226,13 +226,14 @@ void GameOverState::render(sf::RenderWindow& window) { //渲染背景、标题�
         
         // 根据关卡数显示星星
         int stars = 0;
-        if (finalScore >= 15000) {
-            stars = 3;
-        } else if (finalScore >= 10000) {
+        int level = GameState::currentLevel;
+        if (level == 0) {
+            stars = 1;
+        } else if (level == 1) {
             stars = 2;
         } else {
-            stars = 1;
-        }
+            stars = 3;
+        } 
         
         // 显示对应数量的星星
         if (stars >= 1 && starLeftSprite) {
